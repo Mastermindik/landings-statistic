@@ -109,50 +109,62 @@ function App() {
       <div className="stage">
         <b>Стартова сторінка:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Стартова сторінка").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Стартова сторінка").length}</span>
       </div>
       <div className="stage">
         <b>Питання 2:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Питання 2").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Питання 2").length}</span>
       </div>
       <div className="stage">
         <b>Питання 3:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Питання 3").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Питання 3").length}</span>
       </div>
       <div className="stage">
         <b>Перевірка результатів + 1 модальне вікно:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Перевірка результатів + 1 модальне вікно").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Перевірка результатів + 1 модальне вікно").length}</span>
       </div>
       <div className="stage">
         <b>Коробки:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Коробки").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Коробки").length}</span>
       </div>
       <div className="stage">
         <b>Коробки після невдалої спроби відкриття:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Коробки після невдалої спроби відкриття").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Коробки після невдалої спроби відкриття").length}</span>
       </div>
       <div className="stage">
         <b>Коробки після невдалої спроби відкриття 2:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Коробки після невдалої спроби відкриття 2").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Коробки після невдалої спроби відкриття 2").length}</span>
       </div>
       <div className="stage">
         <b>Модальне вікно після 1 невдалого відкриття:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Модальне вікно після 1 невдалого відкриття").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Модальне вікно після 1 невдалого відкриття").length}</span>
       </div>
       <div className="stage">
         <b>Модальне вікно після 2 невдалого відкриття:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Модальне вікно після 2 невдалого відкриття").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Модальне вікно після 2 невдалого відкриття").length}</span>
       </div>
       <div className="stage">
         <b>Модальне вікно після успішного відкриття:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Модальне вікно після успішного відкриття").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Модальне вікно після успішного відкриття").length}</span>
       </div>
       <div className="stage">
         <b>Корзина:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Корзина").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Корзина").length}</span>
       </div>
       <div className="stage">
         <b>Форма відправлена:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Форма відправлена").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
+        <span>{data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Форма відправлена").length}</span>
       </div>
       </>}
     </div>

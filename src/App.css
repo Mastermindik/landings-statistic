@@ -36,6 +36,7 @@ b {
 }
 span {
   margin-right: 5rem;
+  width: 2rem;
 }
 .buttons {
   display: flex;
