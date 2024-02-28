@@ -1,15 +1,10 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import {
   DynamoDBClient,
-  GetItemCommand,
-  GetItemCommandInput,
   ScanCommand,
   ScanCommandInput,
 } from "@aws-sdk/client-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 function App() {
   const [count, setCount] = useState(0);
