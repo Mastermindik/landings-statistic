@@ -5,37 +5,36 @@
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
 .container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.7rem;
 }
+
+.selects {
+  width: 100%;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.item {
+  flex: 1 0 16rem;
+}
+
 .stage {
   width: 100%;
   display: flex;
   align-items: flex-end;
   gap: 5rem;
-  border-bottom: 1px solid #fff;
+  border-bottom: 1px solid #000;
 }
 b {
   margin-right: auto;
 }
 span {
-  margin-right: 5rem;
+  margin-right: 1rem;
   width: 2rem;
 }
 .buttons {

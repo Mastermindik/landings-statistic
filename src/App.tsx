@@ -6,6 +6,13 @@ import {
   ScanCommandInput,
 } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 
 const timeZone = "Europe/Kiev"; // Ваш часовий пояс
 
@@ -17,6 +24,20 @@ type Formated = {
   start: number;
   end: number;
 };
+const startOfDay = new Date(
+  currentDate.getFullYear(),
+  currentDate.getMonth(),
+  currentDate.getDate(),
+  0,
+  0,
+  0
+);
+
+// Приводимо до часового поясу
+startOfDay.toLocaleString("en-US", { timeZone });
+
+const startOfDayTimestamp = startOfDay.getTime();
+console.log(startOfDayTimestamp);
 
 const hourlyRanges: Formated[] = [];
 
@@ -96,12 +117,16 @@ function App() {
   });
 
   async function getItems() {
+
     const params: ScanCommandInput = {
       TableName: "LandingsUserStatistic",
-      FilterExpression: "landingId = :landingId",
+      FilterExpression: "landingId = :landingId AND myTimestamp > :timestamp ",
       ExpressionAttributeValues: {
         ":landingId": {
-          N: id,
+          N: `${+id}`,
+        },
+        ":timestamp": {
+          N: "1000",
         },
       },
     };
@@ -117,38 +142,55 @@ function App() {
     }
   }
 
-  function setPeriod(start: number, end: number) {
-    setStartTime(start);
-    setEndTime(end);
+  function setPeriod(period: string) {
+    setStartTime(+period.split(" ")[0]);
+    setEndTime(+period.split(" ")[1]);
   }
 
   return (
     <div className="container">
-      <div className="">
-        {/* <input
-        type="text"
-        placeholder="ID"
-        value={id}
-        onChange={(e) => setId(e.target.value)}
-      /> */}
-        <select
-          name=""
-          id=""
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-        >
-          <option value="0">--none--</option>
-          {current.map((e) => (
-            <option value={e.id} key={e.id}>
-              {e.name}
-            </option>
-          ))}
-        </select>
-        <button onClick={getItems}>Search</button>
+      <div className="selects">
+        
+        <FormControl className="item" variant="filled" >
+          <InputLabel id="demo-simple-select-label" >ID</InputLabel>
+          <Select
+            label="ID"
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+          >
+            {current.map((e) => (
+              <MenuItem value={e.id} key={e.id}>
+                {e.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl className="item" variant="filled" >
+          <InputLabel>Time</InputLabel>
+          <Select
+            label="Time"
+            value={`${startTime} ${endTime}`}
+            onChange={(e) => setPeriod(e.target.value.toString())}
+          >
+            <MenuItem value={`0 0`} key={0}>
+              Full day
+            </MenuItem>
+            {hoursFormatted.map((e) => (
+              <MenuItem value={`${e.start} ${e.end}`} key={e.start}>
+                {e.startNew} - {e.endNew}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button className="item" size="large" variant="contained" disabled={!id} onClick={getItems}>
+          Search
+        </Button>
       </div>
       {!!data.length && (
         <>
-          <div className="buttons">
+          {/* <div className="buttons">
             {hoursFormatted.map((e) => (
               <button
                 className=""
@@ -168,7 +210,7 @@ function App() {
             >
               Full Day
             </button>
-          </div>
+          </div> */}
           <b>
             Кількість користувачів:{" "}
             {
@@ -176,7 +218,7 @@ function App() {
                 ? data
                 : data?.filter(
                     (e: any) =>
-                      e.timestamp.N > startTime && e.timestamp.N < endTime
+                      e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
               )?.length
             }
@@ -189,7 +231,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Стартова сторінка")
                   .length /
@@ -197,7 +239,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -209,7 +251,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Стартова сторінка")
                   .length
@@ -224,14 +266,14 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Питання 2").length /
                   (startTime === 0
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -243,7 +285,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Питання 2").length
               }
@@ -257,14 +299,14 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Питання 3").length /
                   (startTime === 0
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -276,7 +318,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Питання 3").length
               }
@@ -290,7 +332,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -301,7 +343,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -313,7 +355,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -331,14 +373,14 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Коробки").length /
                   (startTime === 0
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -350,7 +392,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Коробки").length
               }
@@ -364,7 +406,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -375,7 +417,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -387,7 +429,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -405,7 +447,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -416,7 +458,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -428,7 +470,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -446,7 +488,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -457,7 +499,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -469,7 +511,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -487,7 +529,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -498,7 +540,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -510,7 +552,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -528,7 +570,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -539,7 +581,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -551,7 +593,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter(
                     (e: any) =>
@@ -569,14 +611,14 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Корзина").length /
                   (startTime === 0
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -588,7 +630,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Корзина").length
               }
@@ -602,7 +644,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Форма відправлена")
                   .length /
@@ -610,7 +652,7 @@ function App() {
                     ? data
                     : data?.filter(
                         (e: any) =>
-                          e.timestamp.N > startTime && e.timestamp.N < endTime
+                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                       )
                   )?.length) *
                 100
@@ -622,7 +664,7 @@ function App() {
                   ?.filter((e: any) =>
                     startTime === 0
                       ? true
-                      : e.timestamp.N > startTime && e.timestamp.N < endTime
+                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
                   )
                   .filter((e: any) => e.leavingPage.S === "Форма відправлена")
                   .length
