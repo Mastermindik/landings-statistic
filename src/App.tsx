@@ -7,10 +7,10 @@ import {
 } from "@aws-sdk/client-dynamodb";
 
 function App() {
-  const [count, setCount] = useState(0);
+  // const [count, setCount] = useState(0);
   const [id, setId] = useState("");
   const [data, setData] = useState<any>();
-  const [length, setLength] = useState(0)
+  // const [length, setLength] = useState(0)
 
   const ddbClient = new DynamoDBClient({
     region: import.meta.env.VITE_REGION,
