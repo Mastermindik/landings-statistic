@@ -105,6 +105,7 @@ function App() {
         {hoursFormatted.map(e => <button className="" key={e.start} style={{background: startTime === e.start ? "red" : "#1a1a1a"}} onClick={() => setPeriod(e.start, e.end)} >{e.startNew} - {e.endNew}</button> )}
         <button className=""style={{background: startTime === 0 ? "red" : "#1a1a1a"}} onClick={() => setPeriod(0, 0)} >Full Day</button>
       </div>
+      <b>Кількість користувачів: {(startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length}</b>
       <div className="stage">
         <b>Стартова сторінка:</b>
         <span>{(data?.filter((e: any) => startTime === 0 ? true : e.timestamp.N > startTime && e.timestamp.N < endTime).filter((e:any) => e.leavingPage.S === "Стартова сторінка").length / (startTime === 0 ? data : data?.filter((e: any) => e.timestamp.N > startTime && e.timestamp.N < endTime))?.length * 100).toFixed(2) + "%"}</span>
