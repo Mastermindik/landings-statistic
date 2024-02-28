@@ -37,6 +37,11 @@ b {
 span {
   margin-right: 5rem;
 }
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 @media (max-width: 500px) {
   .stage b {
     width: 6rem;
