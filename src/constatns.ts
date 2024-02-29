@@ -51,4 +51,8 @@ export const current = [
     id: 84873,
     name: "FR - Pampers Harmony Danya Amazon ID123",
   },
+  {
+    id: 85289,
+    name: "FR - Kit Prefill Склад Rakuten ID123",
+  },
 ];
