@@ -75,4 +75,12 @@ export const current = [
     id: 86177,
     name: "GB - Ava Danya Pets at home New",
   },
+  {
+    id: 86471,
+    name: "IT - Kit Prefill Склад Amzaon ID123",
+  },
+  {
+    id: 86468,
+    name: "FR - Kit Prefill Склад Amazon",
+  },
 ];
