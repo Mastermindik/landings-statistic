@@ -63,4 +63,12 @@ export const current = [
     id: 86068,
     name: "IT - Meat",
   },
+  {
+    id: 86433,
+    name: "IT - СУМКА Треш 1 box",
+  },
+  {
+    id: 86431,
+    name: "IT - Meat 1 box",
+  },
 ];
