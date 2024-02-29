@@ -83,4 +83,8 @@ export const current = [
     id: 86468,
     name: "FR - Kit Prefill Склад Amazon",
   },
+  {
+    id: 86475,
+    name: "BE - Pampers Prefill Pampers New",
+  },
 ];
