@@ -55,4 +55,12 @@ export const current = [
     id: 85289,
     name: "FR - Kit Prefill Склад Rakuten ID123",
   },
+  {
+    id: 85760,
+    name: "IT - СУМКА Треш",
+  },
+  {
+    id: 86068,
+    name: "IT - Meat",
+  },
 ];
