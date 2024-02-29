@@ -13,6 +13,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
+import { current } from "./constatns";
 
 const timeZone = "Europe/Kiev"; // Ваш часовий пояс
 
@@ -77,28 +78,7 @@ const hoursFormatted = hourlyRanges.map((range) => ({
   }),
 }));
 
-const current = [
-  {
-    id: 86166,
-    name: "HU - Pampers Danya DM",
-  },
-  {
-    id: 86042,
-    name: "FR - Royal Canin Danya ID123",
-  },
-  {
-    id: 85018,
-    name: "MX - Dell Danya Mercado libre",
-  },
-  {
-    id: 84609,
-    name: "FR - Kit Prefill Склад",
-  },
-  {
-    id: 84337,
-    name: "IT - Kit Prefill Склад ID123",
-  },
-];
+
 
 function App() {
   // const [count, setCount] = useState(0);
@@ -152,9 +132,9 @@ function App() {
       <div className="selects">
         
         <FormControl className="item" variant="filled" >
-          <InputLabel id="demo-simple-select-label" >ID</InputLabel>
+          <InputLabel id="demo-simple-select-label" >Name</InputLabel>
           <Select
-            label="ID"
+            label="Name"
             value={id}
             onChange={(e) => setId(e.target.value)}
             labelId="demo-simple-select-label"
