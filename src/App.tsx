@@ -1,10 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import {
-  DynamoDBClient,
-  ScanCommand,
-  ScanCommandInput,
-} from "@aws-sdk/client-dynamodb";
+import { ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   Button,
@@ -14,90 +10,25 @@ import {
   Select,
 } from "@mui/material";
 import { current } from "./constatns";
-
-const timeZone = "Europe/Kiev"; // Ваш часовий пояс
-
-const currentDate = new Date();
-const hoursInDay = 24;
-const hourMilliseconds = 60 * 60 * 1000; // 1 година у мілісекундах
-
-type Formated = {
-  start: number;
-  end: number;
-};
-const startOfDay = new Date(
-  currentDate.getFullYear(),
-  currentDate.getMonth(),
-  currentDate.getDate(),
-  0,
-  0,
-  0
-);
-
-// Приводимо до часового поясу
-startOfDay.toLocaleString("en-US", { timeZone });
-
-const startOfDayTimestamp = startOfDay.getTime();
-console.log(startOfDayTimestamp);
-
-const hourlyRanges: Formated[] = [];
-
-for (let i = 0; i < hoursInDay; i++) {
-  const startHour = new Date(
-    currentDate.getFullYear(),
-    currentDate.getMonth(),
-    currentDate.getDate(),
-    i,
-    0,
-    0
-  );
-  const endHour = new Date(startHour.getTime() + hourMilliseconds);
-
-  // Приводимо до часового поясу
-  startHour.toLocaleString("en-US", { timeZone });
-  endHour.toLocaleString("en-US", { timeZone });
-
-  hourlyRanges.push({
-    start: startHour.getTime(),
-    end: endHour.getTime(),
-  });
-}
-
-const hoursFormatted = hourlyRanges.map((range) => ({
-  start: range.start,
-  end: range.end,
-  startNew: new Date(range.start).toLocaleTimeString("ua-UA", {
-    hour: "numeric",
-    minute: "numeric",
-    timeZone,
-  }),
-  endNew: new Date(range.end).toLocaleTimeString("ua-UA", {
-    hour: "numeric",
-    minute: "numeric",
-    timeZone,
-  }),
-}));
-
-
+import {
+  startOfDayTimestamp,
+  hoursFormatted,
+  filterPageInPercent,
+  filterPageInCount,
+  countUsersInPeriod,
+} from "./feachers";
+import { ddbClient } from "./aws";
+import { LandingStatisticType } from "./types";
+import { leavingPages } from "./constant";
 
 function App() {
-  // const [count, setCount] = useState(0);
   const [id, setId] = useState("");
   const [data, setData] = useState<any>([]);
-  // const [length, setLength] = useState(0)
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(0);
-
-  const ddbClient = new DynamoDBClient({
-    region: import.meta.env.VITE_REGION,
-    credentials: {
-      accessKeyId: import.meta.env.VITE_ACCESSKEYID,
-      secretAccessKey: import.meta.env.VITE_SECRETACCESSKEY,
-    },
-  });
+  const [totalUsers, setTotalUsers] = useState<number>(0);
 
   async function getItems() {
-
     const params: ScanCommandInput = {
       TableName: "LandingsUserStatistic",
       FilterExpression: "landingId = :landingId AND myTimestamp > :timestamp ",
@@ -113,10 +44,12 @@ function App() {
 
     try {
       const data = await ddbClient.send(new ScanCommand(params));
-      setData(data.Items);
+      // setData(data.Items);
+      setTotalUsers(data.Count ? data.Count : 0);
       console.log(data.Count);
       const arr = data.Items?.map((e) => unmarshall(e));
       console.log(arr);
+      setData(arr as LandingStatisticType[]);
     } catch (err) {
       console.log(err);
     }
@@ -130,9 +63,8 @@ function App() {
   return (
     <div className="container">
       <div className="selects">
-        
-        <FormControl className="item" variant="filled" >
-          <InputLabel id="demo-simple-select-label" >Name</InputLabel>
+        <FormControl className="item" variant="filled">
+          <InputLabel id="demo-simple-select-label">Name</InputLabel>
           <Select
             label="Name"
             value={id}
@@ -140,14 +72,16 @@ function App() {
             labelId="demo-simple-select-label"
             id="demo-simple-select"
           >
-            {current.sort((a, b) => a.name.localeCompare(b.name)).map((e) => (
-              <MenuItem value={e.id} key={e.id}>
-                {e.name}
-              </MenuItem>
-            ))}
+            {current
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((e) => (
+                <MenuItem value={e.id} key={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
-        <FormControl className="item" variant="filled" >
+        <FormControl className="item" variant="filled">
           <InputLabel>Time</InputLabel>
           <Select
             label="Time"
@@ -164,493 +98,32 @@ function App() {
             ))}
           </Select>
         </FormControl>
-        <Button className="item" size="large" variant="contained" disabled={!id} onClick={getItems}>
+        <Button
+          className="item"
+          size="large"
+          variant="contained"
+          disabled={!id}
+          onClick={getItems}
+        >
           Search
         </Button>
       </div>
-      {!!data.length && (
+      {!data.length ?
+      <b>Трафіку за цією сторінкою сьогдні немає</b>
+      : (
         <>
-          {/* <div className="buttons">
-            {hoursFormatted.map((e) => (
-              <button
-                className=""
-                key={e.start}
-                style={{
-                  background: startTime === e.start ? "red" : "#1a1a1a",
-                }}
-                onClick={() => setPeriod(e.start, e.end)}
-              >
-                {e.startNew} - {e.endNew}
-              </button>
-            ))}
-            <button
-              className=""
-              style={{ background: startTime === 0 ? "red" : "#1a1a1a" }}
-              onClick={() => setPeriod(0, 0)}
-            >
-              Full Day
-            </button>
-          </div> */}
+          <b>Загальна кількість користувачів за добу: {totalUsers} </b>
           <b>
-            Кількість користувачів:{" "}
-            {
-              (startTime === 0
-                ? data
-                : data?.filter(
-                    (e: any) =>
-                      e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-              )?.length
-            }
+            Кількість користувачів за обраний час:{" "}
+            {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          <div className="stage">
-            <b>Стартова сторінка:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Стартова сторінка")
-                  .length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Стартова сторінка")
-                  .length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Питання 2:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Питання 2").length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Питання 2").length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Питання 3:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Питання 3").length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Питання 3").length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Перевірка результатів + 1 модальне вікно:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Перевірка результатів + 1 модальне вікно"
-                  ).length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Перевірка результатів + 1 модальне вікно"
-                  ).length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Коробки:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Коробки").length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Коробки").length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Коробки після невдалої спроби відкриття:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Коробки після невдалої спроби відкриття"
-                  ).length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Коробки після невдалої спроби відкриття"
-                  ).length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Коробки після невдалої спроби відкриття 2:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Коробки після невдалої спроби відкриття 2"
-                  ).length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Коробки після невдалої спроби відкриття 2"
-                  ).length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Модальне вікно після 1 невдалого відкриття:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Модальне вікно після 1 невдалого відкриття"
-                  ).length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Модальне вікно після 1 невдалого відкриття"
-                  ).length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Модальне вікно після 2 невдалого відкриття:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Модальне вікно після 2 невдалого відкриття"
-                  ).length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Модальне вікно після 2 невдалого відкриття"
-                  ).length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Модальне вікно після успішного відкриття:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Модальне вікно після успішного відкриття"
-                  ).length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter(
-                    (e: any) =>
-                      e.leavingPage.S ===
-                      "Модальне вікно після успішного відкриття"
-                  ).length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Корзина:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Корзина").length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Корзина").length
-              }
-            </span>
-          </div>
-          <div className="stage">
-            <b>Форма відправлена:</b>
-            <span>
-              {(
-                (data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Форма відправлена")
-                  .length /
-                  (startTime === 0
-                    ? data
-                    : data?.filter(
-                        (e: any) =>
-                          e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                      )
-                  )?.length) *
-                100
-              ).toFixed(2) + "%"}
-            </span>
-            <span>
-              {
-                data
-                  ?.filter((e: any) =>
-                    startTime === 0
-                      ? true
-                      : e.myTimestamp.N > startTime && e.myTimestamp.N < endTime
-                  )
-                  .filter((e: any) => e.leavingPage.S === "Форма відправлена")
-                  .length
-              }
-            </span>
-          </div>
+          {leavingPages.map((e, i) => (
+            <div className="stage" key={i}>
+              <b>{e}:</b>
+              <span>{filterPageInPercent(data, e, startTime, endTime)}</span>
+              <span>{filterPageInCount(data, e, startTime, endTime)}</span>
+            </div>
+          ))}
         </>
       )}
     </div>
