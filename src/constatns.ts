@@ -87,4 +87,28 @@ export const current = [
     id: 86475,
     name: "BE - Pampers Prefill Pampers New",
   },
+  {
+    id: 86474,
+    name: "HU - Pampers Danya DM New ID123",
+  },
+  {
+    id: 86473,
+    name: "PL - Pampers Danya Allegro New ID123",
+  },
+  {
+    id: 83956,
+    name: "DE - Chicco Danya",
+  },
+  {
+    id: 86419,
+    name: "FR - Chicco Next2Me Danya",
+  },
+  {
+    id: 86442,
+    name: "BR - Chicco Balloon Danya",
+  },
+  {
+    id: 86452,
+    name: "BR - Chicco Next2Me Danya",
+  },
 ];

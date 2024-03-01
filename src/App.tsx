@@ -140,7 +140,7 @@ function App() {
             labelId="demo-simple-select-label"
             id="demo-simple-select"
           >
-            {current.map((e) => (
+            {current.sort((a, b) => a.name.localeCompare(b.name)).map((e) => (
               <MenuItem value={e.id} key={e.id}>
                 {e.name}
               </MenuItem>
