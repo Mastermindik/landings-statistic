@@ -119,4 +119,8 @@ export const current = [
     id: 86543,
     name: "BR - Royal Canin Danya ID123",
   },
+  {
+    id: 86545,
+    name: "FR - Kit Prefill Склад New",
+  },
 ];
