@@ -131,4 +131,12 @@ export const current = [
     id: 86586,
     name: "FR - Kit Prefill Склад New 2",
   },
+  {
+    id: 86594,
+    name: "FR - Chicco Nex2Me Danya Amazon",
+  },
+  {
+    id: 86595,
+    name: "FR - Chicco Nex2Me Danya Amazon ID123",
+  },
 ];
