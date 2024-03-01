@@ -123,4 +123,8 @@ export const current = [
     id: 86545,
     name: "FR - Kit Prefill Склад New",
   },
+  {
+    id: 85833,
+    name: "FR - Purina Danya Cdiscount ID123",
+  },
 ];
