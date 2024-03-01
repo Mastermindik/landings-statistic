@@ -147,4 +147,8 @@ export const current = [
     id: 86604,
     name: "IT - Kit Prefill Склад ID123 New",
   },
+  {
+    id: 85590,
+    name: "GB - Kit Morrisons",
+  },
 ];
