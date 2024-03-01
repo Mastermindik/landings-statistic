@@ -106,7 +106,7 @@ function App() {
           N: `${+id}`,
         },
         ":timestamp": {
-          N: "1000",
+          N: `${startOfDayTimestamp}`,
         },
       },
     };
