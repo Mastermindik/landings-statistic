@@ -118,7 +118,7 @@ function App() {
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
           {leavingPages.map((e, i) => (
-            <div className="stage" key={i}>
+            <div className="stage" key={i}  >
               <b>{e}:</b>
               <span>{filterPageInPercent(data, e, startTime, endTime)}</span>
               <span>{filterPageInCount(data, e, startTime, endTime)}</span>
