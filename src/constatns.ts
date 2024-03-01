@@ -111,4 +111,12 @@ export const current = [
     id: 86452,
     name: "BR - Chicco Next2Me Danya",
   },
+  {
+    id: 86542,
+    name: "BR - Royal Canin Danya",
+  },
+  {
+    id: 86543,
+    name: "BR - Royal Canin Danya ID123",
+  },
 ];
