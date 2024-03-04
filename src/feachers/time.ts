@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 type FormatedTime = {
   start: number;
   end: number;
@@ -7,6 +9,7 @@ type FormatedTime = {
 const timeZone = "Europe/Kiev";
 
 const currentDate = new Date();
+// const currentDate = dayjs('2024-03-01').toDate();
 const hoursInDay = 24;
 const hourMilliseconds = 60 * 60 * 1000;
 
@@ -39,6 +42,19 @@ for (let i = 0; i < hoursInDay; i++) {
     0
   );
   const endHour = new Date(startHour.getTime() + hourMilliseconds);
+  // const startHour = new Date(
+  //   currentDate.getFullYear(),
+  //   currentDate.getMonth(),
+  //   currentDate.getDate(),
+  //   i,
+  //   0,
+  //   0
+  // );
+  console.log(dayjs(endHour).format("HH-mm-ss"));
+  
+  
+  
+  // const endHour = new Date(startHour.getTime() + hourMilliseconds);
 
   // Приводимо до часового поясу
   startHour.toLocaleString("en-US", { timeZone });

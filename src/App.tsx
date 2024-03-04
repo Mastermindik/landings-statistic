@@ -23,9 +23,11 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/uk';
+console.log(current.length);
+
 function App() {
   const [id, setId] = useState("");
-  const [data, setData] = useState<any>([]);
+  const [data, setData] = useState<LandingStatisticType[]>([]);
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
@@ -34,22 +36,63 @@ function App() {
   console.log(date?.toDate());
   console.log(date?.toDate().getTime());
   
+  console.log(dayjs("2024-03-03").startOf("day").toDate().getTime());
+
+  const minTimestamp = date?.startOf("day").toDate().getTime();
+  console.log(minTimestamp);
+  
+  const maxTimestamp =date?.endOf("day").toDate().getTime();
+  console.log(maxTimestamp);
 
   async function getItems() {
-    const minTimestamp = date?.startOf("day").toDate().getTime();
-    const maxTimestamp = date?.endOf("day").toDate().getTime();
+      const params: ScanCommandInput = {
+        TableName: "LandingsUserStatistic",
+        Limit: 9680,
+        FilterExpression:
+          "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
+        ExpressionAttributeValues: {
+          ":landingId": {
+            N: `${+id}`,
+          },
+          ":minTimestamp": {
+            N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
+          },
+          ":maxTimestamp": {
+            N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
+          },
+        },
+      };
+  
+      try {
+        const data = await ddbClient.send(new ScanCommand(params));
+        setTotalUsers(data.Count ? data.Count : 0);
+        const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
+        setData(arr );
+
+        if (data?.LastEvaluatedKey?.id?.S?.length) {
+          more(data?.LastEvaluatedKey?.id?.S)
+        }
+        
+      } catch (err) {
+        console.log(err);
+      }
+    
+  }
+  async function more(lastEvaluatedKey: string) {
     const params: ScanCommandInput = {
       TableName: "LandingsUserStatistic",
-      // FilterExpression: "landingId = :landingId AND myTimestamp > :timestamp ",
+      Limit: 9680,
+      ExclusiveStartKey: {
+        id: {
+          S: lastEvaluatedKey
+        },
+      },
       FilterExpression:
-        "landingId = :landingId AND myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
       ExpressionAttributeValues: {
         ":landingId": {
           N: `${+id}`,
         },
-        // ":timestamp": {
-        //   N: `${startOfDayTimestamp}`,
-        // },
         ":minTimestamp": {
           N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
         },
@@ -61,12 +104,13 @@ function App() {
 
     try {
       const data = await ddbClient.send(new ScanCommand(params));
-      // setData(data.Items);
-      setTotalUsers(data.Count ? data.Count : 0);
-      console.log(data.Count);
-      const arr = data.Items?.map((e) => unmarshall(e));
-      console.log(arr);
-      setData(arr as LandingStatisticType[]);
+      setTotalUsers(state => data.Count ? state + data.Count : 0);
+      const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
+      setData(state => [...state, ...arr] );
+      if (data?.LastEvaluatedKey?.id?.S?.length) {
+        more(data?.LastEvaluatedKey?.id?.S)
+      }
+      
     } catch (err) {
       console.log(err);
     }
@@ -99,9 +143,9 @@ function App() {
           </Select>
         </FormControl>
         <FormControl className="item" variant="filled">
-          <InputLabel>Time</InputLabel>
+          <InputLabel>Тимчасово працює лише на сьогоднішню дату</InputLabel>
           <Select
-            label="Time"
+            label="Тимчасово працює лише на сьогоднішню дату"
             value={`${startTime} ${endTime}`}
             onChange={(e) => setPeriod(e.target.value.toString())}
           >
@@ -123,7 +167,7 @@ function App() {
           size="large"
           variant="contained"
           disabled={!id}
-          onClick={getItems}
+          onClick={() => getItems()}
         >
           Search
         </Button>
