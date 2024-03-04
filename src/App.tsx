@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { current } from "./constatns";
 import {
-  startOfDayTimestamp,
   hoursFormatted,
   filterPageInPercent,
   filterPageInCount,
@@ -20,24 +19,42 @@ import {
 import { ddbClient } from "./aws";
 import { LandingStatisticType } from "./types";
 import { leavingPages } from "./constant";
-
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { Dayjs } from "dayjs";
+import 'dayjs/locale/uk';
 function App() {
   const [id, setId] = useState("");
   const [data, setData] = useState<any>([]);
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [date, setDate] = useState<Dayjs | null>(dayjs())
+  // console.log(new Date(startOfDayTimestamp));
+  console.log(date?.toDate());
+  console.log(date?.toDate().getTime());
+  
 
   async function getItems() {
+    const minTimestamp = date?.startOf("day").toDate().getTime();
+    const maxTimestamp = date?.endOf("day").toDate().getTime();
     const params: ScanCommandInput = {
       TableName: "LandingsUserStatistic",
-      FilterExpression: "landingId = :landingId AND myTimestamp > :timestamp ",
+      // FilterExpression: "landingId = :landingId AND myTimestamp > :timestamp ",
+      FilterExpression:
+        "landingId = :landingId AND myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
       ExpressionAttributeValues: {
         ":landingId": {
           N: `${+id}`,
         },
-        ":timestamp": {
-          N: `${startOfDayTimestamp}`,
+        // ":timestamp": {
+        //   N: `${startOfDayTimestamp}`,
+        // },
+        ":minTimestamp": {
+          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
+        },
+        ":maxTimestamp": {
+          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
         },
       },
     };
@@ -98,6 +115,9 @@ function App() {
             ))}
           </Select>
         </FormControl>
+        <LocalizationProvider  dateAdapter={AdapterDayjs} adapterLocale="uk" >
+          <DatePicker className="item" label={"Date"} value={date} onChange={newDate => setDate(newDate)} maxDate={dayjs()} />
+        </LocalizationProvider>
         <Button
           className="item"
           size="large"
@@ -108,9 +128,9 @@ function App() {
           Search
         </Button>
       </div>
-      {!data.length ?
-      <b>Трафіку за цією сторінкою сьогдні немає</b>
-      : (
+      {!data.length ? (
+        <b>Трафіку за цією сторінкою сьогдні немає</b>
+      ) : (
         <>
           <b>Загальна кількість користувачів за добу: {totalUsers} </b>
           <b>
@@ -118,10 +138,10 @@ function App() {
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
           {leavingPages.map((e, i) => (
-            <div className="stage" key={i}  >
+            <div className="stage" key={i}>
               <b>{e}:</b>
-              <span>{filterPageInPercent(data, e, startTime, endTime)}</span>
-              <span>{filterPageInCount(data, e, startTime, endTime)}</span>
+              <span className="counter">{filterPageInPercent(data, e, startTime, endTime)}</span>
+              <span className="counter">{filterPageInCount(data, e, startTime, endTime)}</span>
             </div>
           ))}
         </>

@@ -34,7 +34,7 @@
 b {
   margin-right: auto;
 }
-span {
+.counter {
   margin-right: 1rem;
   width: 2rem;
 }
