@@ -175,4 +175,8 @@ export const current = [
     id: 87075,
     name: "FR - Hermes Danya NoSlider ID123",
   },
+  {
+    id: 86917,
+    name: "PL - Perfect Fit Danya Maxi Zoo New",
+  },
 ];
