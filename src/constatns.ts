@@ -163,4 +163,12 @@ export const current = [
     id: 86770,
     name: "MX - Dell Danya Mercado libre New",
   },
+  {
+    id: 87069,
+    name: "FR - Hermes Danya NoComments ID123",
+  },
+  {
+    id: 87071,
+    name: "FR - Hermes Danya 4Photos ID123",
+  },
 ];
