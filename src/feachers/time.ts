@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 
 type FormatedTime = {
   start: number;
@@ -50,7 +49,6 @@ for (let i = 0; i < hoursInDay; i++) {
   //   0,
   //   0
   // );
-  console.log(dayjs(endHour).format("HH-mm-ss"));
   
   
   

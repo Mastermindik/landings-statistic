@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { current } from "./constatns";
 import {
-  hoursFormatted,
   filterPageInPercent,
   filterPageInCount,
   countUsersInPeriod,
@@ -23,7 +22,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/uk';
-console.log(current.length);
+import { useDayParts } from "./hooks/useDates";
 
 function App() {
   const [id, setId] = useState("");
@@ -32,17 +31,11 @@ function App() {
   const [endTime, setEndTime] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [date, setDate] = useState<Dayjs | null>(dayjs())
+  const {dayParts, setCurrentDate} = useDayParts(date)
   // console.log(new Date(startOfDayTimestamp));
-  console.log(date?.toDate());
-  console.log(date?.toDate().getTime());
-  
-  console.log(dayjs("2024-03-03").startOf("day").toDate().getTime());
-
   const minTimestamp = date?.startOf("day").toDate().getTime();
-  console.log(minTimestamp);
   
   const maxTimestamp =date?.endOf("day").toDate().getTime();
-  console.log(maxTimestamp);
 
   async function getItems() {
       const params: ScanCommandInput = {
@@ -121,6 +114,12 @@ function App() {
     setEndTime(+period.split(" ")[1]);
   }
 
+  function aaa(newDate: dayjs.Dayjs | null) {
+    setPeriod("0 0")
+    setDate(newDate)
+    setCurrentDate(newDate)
+  }
+
   return (
     <div className="container">
       <div className="selects">
@@ -143,16 +142,16 @@ function App() {
           </Select>
         </FormControl>
         <FormControl className="item" variant="filled">
-          <InputLabel>Тимчасово працює лише на сьогоднішню дату</InputLabel>
+          <InputLabel>Time</InputLabel>
           <Select
-            label="Тимчасово працює лише на сьогоднішню дату"
+            label="Time"
             value={`${startTime} ${endTime}`}
             onChange={(e) => setPeriod(e.target.value.toString())}
           >
             <MenuItem value={`0 0`} key={0}>
               Full day
             </MenuItem>
-            {hoursFormatted.map((e) => (
+            {dayParts.map((e) => (
               <MenuItem value={`${e.start} ${e.end}`} key={e.start}>
                 {e.startNew} - {e.endNew}
               </MenuItem>
@@ -160,7 +159,7 @@ function App() {
           </Select>
         </FormControl>
         <LocalizationProvider  dateAdapter={AdapterDayjs} adapterLocale="uk" >
-          <DatePicker className="item" label={"Date"} value={date} onChange={newDate => setDate(newDate)} maxDate={dayjs()} />
+          <DatePicker className="item" label={"Date"} value={date} onChange={newDate => aaa(newDate)} maxDate={dayjs()} />
         </LocalizationProvider>
         <Button
           className="item"
