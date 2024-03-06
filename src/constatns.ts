@@ -171,4 +171,8 @@ export const current = [
     id: 87071,
     name: "FR - Hermes Danya 4Photos ID123",
   },
+  {
+    id: 87075,
+    name: "FR - Hermes Danya NoSlider ID123",
+  },
 ];
