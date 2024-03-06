@@ -97,7 +97,7 @@ function App() {
 
     try {
       const data = await ddbClient.send(new ScanCommand(params));
-      setTotalUsers(state => data.Count ? state + data.Count : 0);
+      setTotalUsers(state => data.Count ? state + data.Count : state);
       const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
       setData(state => [...state, ...arr] );
       if (data?.LastEvaluatedKey?.id?.S?.length) {
