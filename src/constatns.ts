@@ -195,4 +195,8 @@ export const current = [
     id: 87045,
     name: "DE - Chicco Next2Me Danya Amazon",
   },
+  {
+    id: 87208,
+    name: "US - Pampers Danya Amazon",
+  },
 ];
