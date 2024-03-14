@@ -17,12 +17,14 @@ import {
 } from "./feachers";
 import { ddbClient } from "./aws";
 import { LandingStatisticType } from "./types";
-import { leavingPages } from "./constant";
+import { leavingPages, newLeavingPages } from "./constant";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import 'dayjs/locale/uk';
 import { useDayParts } from "./hooks/useDates";
+
+const DAY_X = dayjs('2024-03-14').endOf('day').toDate().getTime();
 
 function App() {
   const [id, setId] = useState("");
@@ -37,7 +39,7 @@ function App() {
   
   const maxTimestamp =date?.endOf("day").toDate().getTime();
 
-  async function getItems() {
+  async function getItemsOld() {
       const params: ScanCommandInput = {
         TableName: "LandingsUserStatistic",
         Limit: 9680,
@@ -63,7 +65,7 @@ function App() {
         setData(arr );
 
         if (data?.LastEvaluatedKey?.id?.S?.length) {
-          more(data?.LastEvaluatedKey?.id?.S)
+          moreOld(data?.LastEvaluatedKey?.id?.S)
         }
         
       } catch (err) {
@@ -71,7 +73,7 @@ function App() {
       }
     
   }
-  async function more(lastEvaluatedKey: string) {
+  async function moreOld(lastEvaluatedKey: string) {
     const params: ScanCommandInput = {
       TableName: "LandingsUserStatistic",
       Limit: 9680,
@@ -101,11 +103,86 @@ function App() {
       const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
       setData(state => [...state, ...arr] );
       if (data?.LastEvaluatedKey?.id?.S?.length) {
+        moreOld(data?.LastEvaluatedKey?.id?.S)
+      }
+      
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function getItems() {
+    const params: ScanCommandInput = {
+      TableName: `${id}`,
+      Limit: 9680,
+      FilterExpression:
+        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+      ExpressionAttributeValues: {
+        ":minTimestamp": {
+          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
+        },
+        ":maxTimestamp": {
+          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
+        },
+      },
+    };
+
+    try {
+      const data = await ddbClient.send(new ScanCommand(params));
+      setTotalUsers(data.Count ? data.Count : 0);
+      const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
+      setData(arr);
+
+      if (data?.LastEvaluatedKey?.id?.S?.length) {
         more(data?.LastEvaluatedKey?.id?.S)
       }
       
     } catch (err) {
       console.log(err);
+    }
+  
+}
+async function more(lastEvaluatedKey: string) {
+  const params: ScanCommandInput = {
+    TableName: `${id}`,
+    Limit: 9680,
+    ExclusiveStartKey: {
+      id: {
+        S: lastEvaluatedKey
+      },
+    },
+    FilterExpression:
+      "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+    ExpressionAttributeValues: {
+      ":minTimestamp": {
+        N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
+      },
+      ":maxTimestamp": {
+        N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
+      },
+    },
+  };
+
+  try {
+    const data = await ddbClient.send(new ScanCommand(params));
+    setTotalUsers(state => data.Count ? state + data.Count : state);
+    const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
+    setData(state => [...state, ...arr] );
+    if (data?.LastEvaluatedKey?.id?.S?.length) {
+      more(data?.LastEvaluatedKey?.id?.S)
+    }
+    
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+  function getData() {
+    if (date && DAY_X < date?.toDate().getTime()) {
+    // if (id === "test") {
+      getItems()
+    } else {
+      getItemsOld()
     }
   }
 
@@ -166,7 +243,7 @@ function App() {
           size="large"
           variant="contained"
           disabled={!id}
-          onClick={() => getItems()}
+          onClick={getData}
         >
           Search
         </Button>
@@ -180,7 +257,7 @@ function App() {
             Кількість користувачів за обраний час:{" "}
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          {leavingPages.map((e, i) => (
+          {(id === "test" ? newLeavingPages : leavingPages).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
               <span className="counter">{filterPageInPercent(data, e, startTime, endTime)}</span>
