@@ -219,4 +219,12 @@ export const current = [
     id: 84443,
     name: "IT - Kit Prefill День Рождения ID123",
   },
+  {
+    id: 87650,
+    name: "FR - Wikopet Danya Amazon ID123",
+  },
+  {
+    id: 87643,
+    name: "FR - Wikopet Danya Maxi Zoo ID123",
+  },
 ];
