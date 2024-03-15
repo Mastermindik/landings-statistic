@@ -227,4 +227,8 @@ export const current = [
     id: 87643,
     name: "FR - Wikopet Danya Maxi Zoo ID123",
   },
+  {
+    id: 87843,
+    name: "GB - Pampers Danya New Design",
+  },
 ];

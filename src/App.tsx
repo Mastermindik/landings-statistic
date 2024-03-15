@@ -179,7 +179,7 @@ async function more(lastEvaluatedKey: string) {
 
   function getData() {
     // if (date && DAY_X < date?.toDate().getTime()) {
-    if (id === "test") {
+    if (id === "87843") {
       getItems()
     } else {
       getItemsOld()
