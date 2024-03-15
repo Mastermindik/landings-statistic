@@ -3,11 +3,13 @@ import "./App.css";
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import {
+  Autocomplete,
   Button,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
+  TextField,
 } from "@mui/material";
 import { current } from "./constatns";
 import {
@@ -21,10 +23,10 @@ import { leavingPages, newLeavingPages } from "./constant";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import 'dayjs/locale/uk';
+import "dayjs/locale/uk";
 import { useDayParts } from "./hooks/useDates";
 
-const DAY_X = dayjs('2024-03-14').endOf('day').toDate().getTime();
+// const DAY_X = dayjs('2024-03-14').endOf('day').toDate().getTime();
 
 function App() {
   const [id, setId] = useState("");
@@ -32,46 +34,49 @@ function App() {
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
-  const [date, setDate] = useState<Dayjs | null>(dayjs())
-  const {dayParts, setCurrentDate} = useDayParts(date)
+  const [date, setDate] = useState<Dayjs | null>(dayjs());
+  const { dayParts, setCurrentDate } = useDayParts(date);
+  const [autocompleteValue, setAutocompleteValue] = useState<null | string>(
+    null
+  );
   // console.log(new Date(startOfDayTimestamp));
   const minTimestamp = date?.startOf("day").toDate().getTime();
-  
-  const maxTimestamp =date?.endOf("day").toDate().getTime();
+
+  const maxTimestamp = date?.endOf("day").toDate().getTime();
 
   async function getItemsOld() {
-      const params: ScanCommandInput = {
-        TableName: "LandingsUserStatistic",
-        Limit: 9680,
-        FilterExpression:
-          "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
-        ExpressionAttributeValues: {
-          ":landingId": {
-            N: `${+id}`,
-          },
-          ":minTimestamp": {
-            N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
-          },
-          ":maxTimestamp": {
-            N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
-          },
+    const params: ScanCommandInput = {
+      TableName: "LandingsUserStatistic",
+      Limit: 9680,
+      FilterExpression:
+        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
+      ExpressionAttributeValues: {
+        ":landingId": {
+          N: `${+id}`,
         },
-      };
-  
-      try {
-        const data = await ddbClient.send(new ScanCommand(params));
-        setTotalUsers(data.Count ? data.Count : 0);
-        const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
-        setData(arr );
+        ":minTimestamp": {
+          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
+        },
+        ":maxTimestamp": {
+          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
+        },
+      },
+    };
 
-        if (data?.LastEvaluatedKey?.id?.S?.length) {
-          moreOld(data?.LastEvaluatedKey?.id?.S)
-        }
-        
-      } catch (err) {
-        console.log(err);
+    try {
+      const data = await ddbClient.send(new ScanCommand(params));
+      setTotalUsers(data.Count ? data.Count : 0);
+      const arr = data.Items?.map((e) =>
+        unmarshall(e)
+      ) as LandingStatisticType[];
+      setData(arr);
+
+      if (data?.LastEvaluatedKey?.id?.S?.length) {
+        moreOld(data?.LastEvaluatedKey?.id?.S);
       }
-    
+    } catch (err) {
+      console.log(err);
+    }
   }
   async function moreOld(lastEvaluatedKey: string) {
     const params: ScanCommandInput = {
@@ -79,7 +84,7 @@ function App() {
       Limit: 9680,
       ExclusiveStartKey: {
         id: {
-          S: lastEvaluatedKey
+          S: lastEvaluatedKey,
         },
       },
       FilterExpression:
@@ -99,13 +104,14 @@ function App() {
 
     try {
       const data = await ddbClient.send(new ScanCommand(params));
-      setTotalUsers(state => data.Count ? state + data.Count : state);
-      const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
-      setData(state => [...state, ...arr] );
+      setTotalUsers((state) => (data.Count ? state + data.Count : state));
+      const arr = data.Items?.map((e) =>
+        unmarshall(e)
+      ) as LandingStatisticType[];
+      setData((state) => [...state, ...arr]);
       if (data?.LastEvaluatedKey?.id?.S?.length) {
-        moreOld(data?.LastEvaluatedKey?.id?.S)
+        moreOld(data?.LastEvaluatedKey?.id?.S);
       }
-      
     } catch (err) {
       console.log(err);
     }
@@ -115,8 +121,7 @@ function App() {
     const params: ScanCommandInput = {
       TableName: `${id}`,
       Limit: 9680,
-      FilterExpression:
-        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
       ExpressionAttributeValues: {
         ":minTimestamp": {
           N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
@@ -130,59 +135,59 @@ function App() {
     try {
       const data = await ddbClient.send(new ScanCommand(params));
       setTotalUsers(data.Count ? data.Count : 0);
-      const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
+      const arr = data.Items?.map((e) =>
+        unmarshall(e)
+      ) as LandingStatisticType[];
       setData(arr);
 
       if (data?.LastEvaluatedKey?.id?.S?.length) {
-        more(data?.LastEvaluatedKey?.id?.S)
+        more(data?.LastEvaluatedKey?.id?.S);
       }
-      
     } catch (err) {
       console.log(err);
     }
-  
-}
-async function more(lastEvaluatedKey: string) {
-  const params: ScanCommandInput = {
-    TableName: `${id}`,
-    Limit: 9680,
-    ExclusiveStartKey: {
-      id: {
-        S: lastEvaluatedKey
-      },
-    },
-    FilterExpression:
-      "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
-    ExpressionAttributeValues: {
-      ":minTimestamp": {
-        N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
-      },
-      ":maxTimestamp": {
-        N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
-      },
-    },
-  };
-
-  try {
-    const data = await ddbClient.send(new ScanCommand(params));
-    setTotalUsers(state => data.Count ? state + data.Count : state);
-    const arr = data.Items?.map((e) => unmarshall(e)) as LandingStatisticType[];
-    setData(state => [...state, ...arr] );
-    if (data?.LastEvaluatedKey?.id?.S?.length) {
-      more(data?.LastEvaluatedKey?.id?.S)
-    }
-    
-  } catch (err) {
-    console.log(err);
   }
-}
+  async function more(lastEvaluatedKey: string) {
+    const params: ScanCommandInput = {
+      TableName: `${id}`,
+      Limit: 9680,
+      ExclusiveStartKey: {
+        id: {
+          S: lastEvaluatedKey,
+        },
+      },
+      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+      ExpressionAttributeValues: {
+        ":minTimestamp": {
+          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
+        },
+        ":maxTimestamp": {
+          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
+        },
+      },
+    };
+
+    try {
+      const data = await ddbClient.send(new ScanCommand(params));
+      setTotalUsers((state) => (data.Count ? state + data.Count : state));
+      const arr = data.Items?.map((e) =>
+        unmarshall(e)
+      ) as LandingStatisticType[];
+      setData((state) => [...state, ...arr]);
+      if (data?.LastEvaluatedKey?.id?.S?.length) {
+        more(data?.LastEvaluatedKey?.id?.S);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   function getData() {
     // if (date && DAY_X < date?.toDate().getTime()) {
     if (id === "87843") {
-      getItems()
+      getItems();
     } else {
-      getItemsOld()
+      getItemsOld();
     }
   }
 
@@ -192,15 +197,15 @@ async function more(lastEvaluatedKey: string) {
   }
 
   function aaa(newDate: dayjs.Dayjs | null) {
-    setPeriod("0 0")
-    setDate(newDate)
-    setCurrentDate(newDate)
+    setPeriod("0 0");
+    setDate(newDate);
+    setCurrentDate(newDate);
   }
 
   return (
     <div className="container">
       <div className="selects">
-        <FormControl className="item" variant="filled">
+        {/* <FormControl className="item" variant="filled">
           <InputLabel id="demo-simple-select-label">Name</InputLabel>
           <Select
             label="Name"
@@ -217,7 +222,21 @@ async function more(lastEvaluatedKey: string) {
                 </MenuItem>
               ))}
           </Select>
-        </FormControl>
+        </FormControl> */}
+        <Autocomplete
+          className="item"
+          value={autocompleteValue}
+          options={current.map((e) => e.name)}
+          onChange={(_event: any, newValue: string | null) => {
+            setAutocompleteValue(newValue);
+            setId(
+              newValue
+                ? current.filter((e) => e.name === newValue)[0].id.toString()
+                : ""
+            );
+          }}
+          renderInput={(params) => <TextField {...params} label="Name" />}
+        />
         <FormControl className="item" variant="filled">
           <InputLabel>Time</InputLabel>
           <Select
@@ -235,8 +254,14 @@ async function more(lastEvaluatedKey: string) {
             ))}
           </Select>
         </FormControl>
-        <LocalizationProvider  dateAdapter={AdapterDayjs} adapterLocale="uk" >
-          <DatePicker className="item" label={"Date"} value={date} onChange={newDate => aaa(newDate)} maxDate={dayjs()} />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="uk">
+          <DatePicker
+            className="item"
+            label={"Date"}
+            value={date}
+            onChange={(newDate) => aaa(newDate)}
+            maxDate={dayjs()}
+          />
         </LocalizationProvider>
         <Button
           className="item"
@@ -260,8 +285,12 @@ async function more(lastEvaluatedKey: string) {
           {(id === "87843" ? newLeavingPages : leavingPages).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
-              <span className="counter">{filterPageInPercent(data, e, startTime, endTime)}</span>
-              <span className="counter">{filterPageInCount(data, e, startTime, endTime)}</span>
+              <span className="counter">
+                {filterPageInPercent(data, e, startTime, endTime)}
+              </span>
+              <span className="counter">
+                {filterPageInCount(data, e, startTime, endTime)}
+              </span>
             </div>
           ))}
         </>
