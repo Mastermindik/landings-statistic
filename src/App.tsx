@@ -257,7 +257,7 @@ async function more(lastEvaluatedKey: string) {
             Кількість користувачів за обраний час:{" "}
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          {(id === "test" ? newLeavingPages : leavingPages).map((e, i) => (
+          {(id === "87843" ? newLeavingPages : leavingPages).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
               <span className="counter">{filterPageInPercent(data, e, startTime, endTime)}</span>
