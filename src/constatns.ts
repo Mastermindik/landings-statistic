@@ -231,4 +231,12 @@ export const current = [
     id: 87843,
     name: "GB - Pampers Danya New Design",
   },
+  {
+    id: 87857,
+    name: "FR - Highwaykick Danya Amazon ID123",
+  },
+  {
+    id: 87855,
+    name: "FR - Highwaykick Danya La Grande Récré ID123",
+  },
 ];
