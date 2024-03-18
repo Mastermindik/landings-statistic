@@ -239,4 +239,8 @@ export const current = [
     id: 87855,
     name: "FR - Highwaykick Danya La Grande Récré ID123",
   },
+  {
+    id: 88028,
+    name: "PL - Fuel Danya Orlen",
+  },
 ];
