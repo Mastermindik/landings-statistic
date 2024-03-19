@@ -243,4 +243,8 @@ export const current = [
     id: 88028,
     name: "PL - Fuel Danya Orlen",
   },
+  {
+    id: 88084,
+    name: "IT - Fuel Danya Eni ID123",
+  },
 ];
