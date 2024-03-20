@@ -282,7 +282,7 @@ function App() {
             Кількість користувачів за обраний час:{" "}
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          {(id === "87843" ? newLeavingPages : id === "88238" ? leavingPagesFuel : leavingPages).map((e, i) => (
+          {(id === "88275" ? newLeavingPages : id === "88238" ? leavingPagesFuel : leavingPages).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
               <span className="counter">
