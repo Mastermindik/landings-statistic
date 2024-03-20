@@ -119,10 +119,13 @@ function App() {
 
   async function getItems() {
     const params: ScanCommandInput = {
-      TableName: `${id}`,
+      TableName: `ReactLandings`,
       Limit: 9680,
-      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
       ExpressionAttributeValues: {
+        ":landingId": {
+          N: `${+id}`,
+        },
         ":minTimestamp": {
           N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
         },
@@ -149,15 +152,18 @@ function App() {
   }
   async function more(lastEvaluatedKey: string) {
     const params: ScanCommandInput = {
-      TableName: `${id}`,
+      TableName: `ReactLandings`,
       Limit: 9680,
       ExclusiveStartKey: {
         id: {
           S: lastEvaluatedKey,
         },
       },
-      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp",
+      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
       ExpressionAttributeValues: {
+        ":landingId": {
+          N: `${+id}`,
+        },
         ":minTimestamp": {
           N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
         },
@@ -184,7 +190,7 @@ function App() {
 
   function getData() {
     // if (date && DAY_X < date?.toDate().getTime()) {
-    if (id === "87843") {
+    if (id === "88275") {
       getItems();
     } else {
       getItemsOld();
