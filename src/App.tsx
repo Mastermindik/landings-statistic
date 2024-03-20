@@ -19,7 +19,7 @@ import {
 } from "./feachers";
 import { ddbClient } from "./aws";
 import { LandingStatisticType } from "./types";
-import { leavingPages, newLeavingPages } from "./constant";
+import { leavingPages, leavingPagesFuel, newLeavingPages } from "./constant";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
@@ -282,7 +282,7 @@ function App() {
             Кількість користувачів за обраний час:{" "}
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          {(id === "87843" ? newLeavingPages : leavingPages).map((e, i) => (
+          {(id === "87843" ? newLeavingPages : id === "88238" ? leavingPagesFuel : leavingPages).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
               <span className="counter">
