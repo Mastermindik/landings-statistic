@@ -27,6 +27,7 @@ import "dayjs/locale/uk";
 import { useDayParts } from "./hooks/useDates";
 
 // const DAY_X = dayjs('2024-03-14').endOf('day').toDate().getTime();
+const reactID = ["88333", "88275"]
 
 function App() {
   const [id, setId] = useState("");
@@ -190,7 +191,7 @@ function App() {
 
   function getData() {
     // if (date && DAY_X < date?.toDate().getTime()) {
-    if (id === "88275") {
+    if (reactID.some(e => e === id)) {
       getItems();
     } else {
       getItemsOld();
@@ -288,7 +289,7 @@ function App() {
             Кількість користувачів за обраний час:{" "}
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          {(id === "88275" ? newLeavingPages : id === "88238" ? leavingPagesFuel : leavingPages).map((e, i) => (
+          {(reactID.some(e => e === id) ? newLeavingPages : id === "88238" ? leavingPagesFuel : leavingPages).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
               <span className="counter">
