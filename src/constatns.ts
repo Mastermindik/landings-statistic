@@ -229,7 +229,7 @@ export const current = [
   },
   {
     id: 88275,
-    name: "GB - Pampers Danya New Design New",
+    name: "PL - Pampers Danya New Design New",
   },
   {
     id: 87857,
