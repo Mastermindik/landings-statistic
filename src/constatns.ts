@@ -267,4 +267,12 @@ export const current = [
     id: 89060,
     name: "ES - Wikopet Danya New Design ID123",
   },
+  {
+    id: 89113,
+    name: "CA - Huggies Danya Walmart",
+  },
+  {
+    id: 89102,
+    name: "IT - Huggies Danya Amazon ID123",
+  },
 ];
