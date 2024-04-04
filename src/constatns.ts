@@ -283,4 +283,8 @@ export const current = [
     id: 89426,
     name: "MX - Chicco Balloon Danya Palacio de Hierro",
   },
+  {
+    id: 89785,
+    name: "CZ - Chicco Next2Me Danya",
+  },
 ];
