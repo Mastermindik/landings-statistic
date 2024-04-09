@@ -311,4 +311,8 @@ export const current = [
     id: 90326,
     name: "IT - Huggies Extra Care Danya Amazon ID123",
   },
+  {
+    id: 90329,
+    name: "FR - Huggies Extra Care Danya Amazon ID123",
+  },
 ];
