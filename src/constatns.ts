@@ -303,4 +303,8 @@ export const current = [
     id: 90107,
     name: "MX - Chom Chom Roller Danya",
   },
+  {
+    id: 90266,
+    name: "PL - Chom Chom Roller Danya",
+  },
 ];
