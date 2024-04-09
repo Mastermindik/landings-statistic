@@ -317,6 +317,6 @@ export const current = [
   },
   {
     id: 90270,
-    name: "IT - Dove Danya ID123 Amazon",
+    name: "IT - Dove Danya Amazon ID123 ",
   },
 ];
