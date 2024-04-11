@@ -339,4 +339,28 @@ export const current = [
     id: 90564,
     name: "IT - Vigor Tools Danya LeroyMerlin ID123",
   },
+  {
+    id: 90572,
+    name: "AT - Lawnmower Greenwood Danya Amazon",
+  },
+  {
+    id: 90573,
+    name: "DE - Lawnmower Greenwood Danya Amazon",
+  },
+  {
+    id: 90576,
+    name: "SK - Lawnmower Greenwood Danya Heureka",
+  },
+  {
+    id: 90579,
+    name: "SK - Lawnmower Greenwood Danya Heureka ID123",
+  },
+  {
+    id: 90580,
+    name: "SI - Lawnmower Greenwood Danya Amazon",
+  },
+  {
+    id: 90582,
+    name: "BE - Lawnmower Greenwood Danya Amazon",
+  },
 ];
