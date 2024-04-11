@@ -335,4 +335,8 @@ export const current = [
     id: 90460,
     name: "FR - Lawnmower Greenwood Danya Amaon ID123",
   },
+  {
+    id: 90564,
+    name: "IT - Vigor Tools Danya LeroyMerlin ID123",
+  },
 ];
