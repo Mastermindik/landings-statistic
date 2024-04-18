@@ -375,4 +375,8 @@ export const current = [
     id: 91102,
     name: "IT - Hot Wheels Danya Toys Center ID123",
   },
+  {
+    id: 90947,
+    name: "IT - Chicco Walky Talky Danya Toys Center ID123",
+  },
 ];
