@@ -383,4 +383,8 @@ export const current = [
     id: 91177,
     name: "CZ - Royal Canin Danya SuperZoo",
   },
+  {
+    id: 91181,
+    name: "CZ - Royal Canin Danya SuperZoo New",
+  },
 ];
