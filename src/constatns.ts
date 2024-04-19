@@ -395,4 +395,8 @@ export const current = [
     id: 91235,
     name: "FR - HW Super Ultimate Garage Danya Amazon ID123",
   },
+  {
+    id: 91333,
+    name: "FR - HW Super Ultimate Garage Danya CDiscount ID123",
+  },
 ];
