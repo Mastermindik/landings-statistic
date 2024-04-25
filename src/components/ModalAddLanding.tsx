@@ -3,8 +3,6 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useState } from "react";
 import "../styles/modal.css";
 import { useAddLanding } from "../hooks/useLandingList";
-import { current } from "../constatns";
-
 
 type Props = {
   open: boolean;
@@ -32,9 +30,6 @@ export default function ModalAddLanding({ handleClose, open }: Props) {
   return (
     <Modal open={open} onClose={handleClose}>
       <div className="modal">
-      <button onClick={() => {
-        current.map(async e => await addLanding({landingId: e.id, landingName: e.name}))
-      }} >aaaaaaaaa</button>
         <TextField
           type="number"
           fullWidth
