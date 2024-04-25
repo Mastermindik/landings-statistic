@@ -5,13 +5,14 @@ import { unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   Autocomplete,
   Button,
+  Fab,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   TextField,
 } from "@mui/material";
-import { current } from "./constatns";
+// import { current } from "./constatns";
 import {
   filterPageInPercent,
   filterPageInCount,
@@ -25,9 +26,16 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/uk";
 import { useDayParts } from "./hooks/useDates";
+import ModalAddLanding from "./components/ModalAddLanding";
+import AddIcon from "@mui/icons-material/Add";
+import { useGetLandingList } from "./hooks/useLandingList";
 
 // const DAY_X = dayjs('2024-03-14').endOf('day').toDate().getTime();
-const reactID = ["88333", "88275","89060"]
+const reactID = ["88333", "88275", "89060"];
+const ADMIN = import.meta.env.VITE_PASSWORD;
+const storagePassword = localStorage.getItem("admin")
+  ? localStorage.getItem("admin")
+  : "";
 
 function App() {
   const [id, setId] = useState("");
@@ -40,7 +48,10 @@ function App() {
   const [autocompleteValue, setAutocompleteValue] = useState<null | string>(
     null
   );
-  // console.log(new Date(startOfDayTimestamp));
+  const [open, setOpen] = useState<boolean>(false);
+  const { data: current } = useGetLandingList();
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const minTimestamp = date?.startOf("day").toDate().getTime();
 
   const maxTimestamp = date?.endOf("day").toDate().getTime();
@@ -122,7 +133,8 @@ function App() {
     const params: ScanCommandInput = {
       TableName: `ReactLandings`,
       Limit: 9680,
-      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
+      FilterExpression:
+        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
       ExpressionAttributeValues: {
         ":landingId": {
           N: `${+id}`,
@@ -160,7 +172,8 @@ function App() {
           S: lastEvaluatedKey,
         },
       },
-      FilterExpression: "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
+      FilterExpression:
+        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
       ExpressionAttributeValues: {
         ":landingId": {
           N: `${+id}`,
@@ -191,7 +204,7 @@ function App() {
 
   function getData() {
     // if (date && DAY_X < date?.toDate().getTime()) {
-    if (reactID.some(e => e === id)) {
+    if (reactID.some((e) => e === id)) {
       getItems();
     } else {
       getItemsOld();
@@ -211,6 +224,7 @@ function App() {
 
   return (
     <div className="container">
+      <ModalAddLanding open={open} handleClose={handleClose} />
       <div className="selects">
         {/* <FormControl className="item" variant="filled">
           <InputLabel id="demo-simple-select-label">Name</InputLabel>
@@ -233,12 +247,12 @@ function App() {
         <Autocomplete
           className="item"
           value={autocompleteValue}
-          options={current.map((e) => e.name)}
+          options={current.map((e) => e.landingName)}
           onChange={(_event: any, newValue: string | null) => {
             setAutocompleteValue(newValue);
             setId(
               newValue
-                ? current.filter((e) => e.name === newValue)[0].id.toString()
+                ? current.filter((e) => e.landingName === newValue)[0].landingId.toString()
                 : ""
             );
           }}
@@ -289,7 +303,12 @@ function App() {
             Кількість користувачів за обраний час:{" "}
             {countUsersInPeriod(data, startTime, endTime)}
           </b>
-          {(reactID.some(e => e === id) ? newLeavingPages : id === "88238" ? leavingPagesFuel : leavingPages).map((e, i) => (
+          {(reactID.some((e) => e === id)
+            ? newLeavingPages
+            : id === "88238"
+            ? leavingPagesFuel
+            : leavingPages
+          ).map((e, i) => (
             <div className="stage" key={i}>
               <b>{e}:</b>
               <span className="counter">
@@ -301,6 +320,13 @@ function App() {
             </div>
           ))}
         </>
+      )}
+      {ADMIN === storagePassword && (
+        <div className="addBtn">
+          <Fab color="secondary" aria-label="add" onClick={handleOpen}>
+            <AddIcon />
+          </Fab>
+        </div>
       )}
     </div>
   );

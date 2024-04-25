@@ -43,6 +43,11 @@ b {
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+.addBtn {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
 @media (max-width: 500px) {
   .stage b {
     width: 6rem;
