@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "./App.css";
-import { ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   Autocomplete,
+  Backdrop,
   Button,
+  CircularProgress,
   Fab,
   FormControl,
   InputLabel,
@@ -12,14 +12,11 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-// import { current } from "./constatns";
 import {
   filterPageInPercent,
   filterPageInCount,
   countUsersInPeriod,
 } from "./feachers";
-import { ddbClient } from "./aws";
-import { LandingStatisticType } from "./types";
 import { leavingPages, leavingPagesFuel, newLeavingPages } from "./constant";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -29,8 +26,8 @@ import { useDayParts } from "./hooks/useDates";
 import ModalAddLanding from "./components/ModalAddLanding";
 import AddIcon from "@mui/icons-material/Add";
 import { useGetLandingList } from "./hooks/useLandingList";
+import { useGetStatistic } from "./hooks/useGetStatistic";
 
-// const DAY_X = dayjs('2024-03-14').endOf('day').toDate().getTime();
 const reactID = ["88333", "88275", "89060"];
 const ADMIN = import.meta.env.VITE_PASSWORD;
 const storagePassword = localStorage.getItem("admin")
@@ -39,10 +36,9 @@ const storagePassword = localStorage.getItem("admin")
 
 function App() {
   const [id, setId] = useState("");
-  const [data, setData] = useState<LandingStatisticType[]>([]);
+  const {data, totalUsers, isLoading, getStatistic} = useGetStatistic();
   const [startTime, setStartTime] = useState<number>(0);
   const [endTime, setEndTime] = useState<number>(0);
-  const [totalUsers, setTotalUsers] = useState<number>(0);
   const [date, setDate] = useState<Dayjs | null>(dayjs());
   const { dayParts, setCurrentDate } = useDayParts(date);
   const [autocompleteValue, setAutocompleteValue] = useState<null | string>(
@@ -56,159 +52,8 @@ function App() {
 
   const maxTimestamp = date?.endOf("day").toDate().getTime();
 
-  async function getItemsOld() {
-    const params: ScanCommandInput = {
-      TableName: "LandingsUserStatistic",
-      Limit: 9680,
-      FilterExpression:
-        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
-      ExpressionAttributeValues: {
-        ":landingId": {
-          N: `${+id}`,
-        },
-        ":minTimestamp": {
-          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
-        },
-        ":maxTimestamp": {
-          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
-        },
-      },
-    };
-
-    try {
-      const data = await ddbClient.send(new ScanCommand(params));
-      setTotalUsers(data.Count ? data.Count : 0);
-      const arr = data.Items?.map((e) =>
-        unmarshall(e)
-      ) as LandingStatisticType[];
-      setData(arr);
-
-      if (data?.LastEvaluatedKey?.id?.S?.length) {
-        moreOld(data?.LastEvaluatedKey?.id?.S);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-  async function moreOld(lastEvaluatedKey: string) {
-    const params: ScanCommandInput = {
-      TableName: "LandingsUserStatistic",
-      Limit: 9680,
-      ExclusiveStartKey: {
-        id: {
-          S: lastEvaluatedKey,
-        },
-      },
-      FilterExpression:
-        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
-      ExpressionAttributeValues: {
-        ":landingId": {
-          N: `${+id}`,
-        },
-        ":minTimestamp": {
-          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
-        },
-        ":maxTimestamp": {
-          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
-        },
-      },
-    };
-
-    try {
-      const data = await ddbClient.send(new ScanCommand(params));
-      setTotalUsers((state) => (data.Count ? state + data.Count : state));
-      const arr = data.Items?.map((e) =>
-        unmarshall(e)
-      ) as LandingStatisticType[];
-      setData((state) => [...state, ...arr]);
-      if (data?.LastEvaluatedKey?.id?.S?.length) {
-        moreOld(data?.LastEvaluatedKey?.id?.S);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async function getItems() {
-    const params: ScanCommandInput = {
-      TableName: `ReactLandings`,
-      Limit: 9680,
-      FilterExpression:
-        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
-      ExpressionAttributeValues: {
-        ":landingId": {
-          N: `${+id}`,
-        },
-        ":minTimestamp": {
-          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
-        },
-        ":maxTimestamp": {
-          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
-        },
-      },
-    };
-
-    try {
-      const data = await ddbClient.send(new ScanCommand(params));
-      setTotalUsers(data.Count ? data.Count : 0);
-      const arr = data.Items?.map((e) =>
-        unmarshall(e)
-      ) as LandingStatisticType[];
-      setData(arr);
-
-      if (data?.LastEvaluatedKey?.id?.S?.length) {
-        more(data?.LastEvaluatedKey?.id?.S);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-  async function more(lastEvaluatedKey: string) {
-    const params: ScanCommandInput = {
-      TableName: `ReactLandings`,
-      Limit: 9680,
-      ExclusiveStartKey: {
-        id: {
-          S: lastEvaluatedKey,
-        },
-      },
-      FilterExpression:
-        "myTimestamp BETWEEN :minTimestamp AND :maxTimestamp AND landingId = :landingId",
-      ExpressionAttributeValues: {
-        ":landingId": {
-          N: `${+id}`,
-        },
-        ":minTimestamp": {
-          N: `${minTimestamp}`, // Мінімальний timestamp (у мілісекундах)
-        },
-        ":maxTimestamp": {
-          N: `${maxTimestamp}`, // Максимальний timestamp (у мілісекундах)
-        },
-      },
-    };
-
-    try {
-      const data = await ddbClient.send(new ScanCommand(params));
-      setTotalUsers((state) => (data.Count ? state + data.Count : state));
-      const arr = data.Items?.map((e) =>
-        unmarshall(e)
-      ) as LandingStatisticType[];
-      setData((state) => [...state, ...arr]);
-      if (data?.LastEvaluatedKey?.id?.S?.length) {
-        more(data?.LastEvaluatedKey?.id?.S);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
   function getData() {
-    // if (date && DAY_X < date?.toDate().getTime()) {
-    if (reactID.some((e) => e === id)) {
-      getItems();
-    } else {
-      getItemsOld();
-    }
+    getStatistic(id, minTimestamp, maxTimestamp);
   }
 
   function setPeriod(period: string) {
@@ -216,7 +61,7 @@ function App() {
     setEndTime(+period.split(" ")[1]);
   }
 
-  function aaa(newDate: dayjs.Dayjs | null) {
+  function changeDate(newDate: dayjs.Dayjs | null) {
     setPeriod("0 0");
     setDate(newDate);
     setCurrentDate(newDate);
@@ -224,26 +69,14 @@ function App() {
 
   return (
     <div className="container">
-      <ModalAddLanding open={open} handleClose={handleClose} />
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <ModalAddLanding open={open} handleClose={handleClose} landingsList={current} />
       <div className="selects">
-        {/* <FormControl className="item" variant="filled">
-          <InputLabel id="demo-simple-select-label">Name</InputLabel>
-          <Select
-            label="Name"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-          >
-            {current
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((e) => (
-                <MenuItem value={e.id} key={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-          </Select>
-        </FormControl> */}
         <Autocomplete
           className="item"
           value={autocompleteValue}
@@ -280,7 +113,7 @@ function App() {
             className="item"
             label={"Date"}
             value={date}
-            onChange={(newDate) => aaa(newDate)}
+            onChange={(newDate) => changeDate(newDate)}
             maxDate={dayjs()}
           />
         </LocalizationProvider>

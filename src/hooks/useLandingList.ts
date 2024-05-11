@@ -1,62 +1,73 @@
-import { PutItemCommand, PutItemCommandInput, ScanCommand, ScanCommandInput } from "@aws-sdk/client-dynamodb";
-import { useEffect, useState } from "react"
+import {
+  PutItemCommand,
+  PutItemCommandInput,
+  ScanCommand,
+  ScanCommandInput,
+} from "@aws-sdk/client-dynamodb";
+import { useEffect, useState } from "react";
 import { ddbClient } from "../aws";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
-type DataType = {
+export type DataType = {
   landingId: number;
   landingName: string;
-}
+};
 
 export const useGetLandingList = () => {
   const [data, setData] = useState<DataType[]>([]);
-  
+
   const fetchData = async () => {
     const params: ScanCommandInput = {
       TableName: "landingsList",
-    }
+    };
 
     try {
-      const response = await ddbClient.send(new ScanCommand(params))
-      const buffer = response.Items?.map(e => unmarshall(e)) as DataType[];
+      const response = await ddbClient.send(new ScanCommand(params));
+      const buffer = response.Items?.map((e) => unmarshall(e)) as DataType[];
       console.log(buffer);
-      
-      setData(buffer)
+
+      setData(buffer);
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [])
-  
+    fetchData();
+  }, []);
 
-  
-  return {data}
-}
+  return { data };
+};
 
 export const useAddLanding = () => {
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const addLanding = async (landing: DataType) => {
     const params: PutItemCommandInput = {
       TableName: "landingsList",
       Item: {
-        "landingId": {
-          N: `${landing.landingId}`
+        landingId: {
+          N: `${landing.landingId}`,
         },
-        "landingName": {
-          S: landing.landingName
-        }
-      }
-    }
-  
+        landingName: {
+          S: landing.landingName,
+        },
+      },
+    };
+
     try {
-      const response = await ddbClient.send(new PutItemCommand(params))
+      setIsLoading(true);
+      const response = await ddbClient.send(new PutItemCommand(params));
       console.log(response);
-      
+      setIsLoading(false);
+      setIsSuccess(true);
     } catch (e) {
-      console.error(e)
+      setIsError(true);
+      console.error(e);
+      alert(e);
     }
-  }
-  return {addLanding}
-}
+  };
+  return { addLanding, isSuccess, isError, isLoading };
+};

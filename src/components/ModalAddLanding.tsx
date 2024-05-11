@@ -2,18 +2,19 @@ import { Button, Fab, Modal, TextField } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useState } from "react";
 import "../styles/modal.css";
-import { useAddLanding } from "../hooks/useLandingList";
+import { DataType, useAddLanding } from "../hooks/useLandingList";
 
 type Props = {
   open: boolean;
   handleClose: () => void;
+  landingsList: DataType[]
 };
 
 const LINK = import.meta.env.VITE_LINK;
 const LINK_NOT_MY = import.meta.env.VITE_LINK_NOT_MY;
 const LINK_FUEL = import.meta.env.VITE_LINK_FUEL;
 
-export default function ModalAddLanding({ handleClose, open }: Props) {
+export default function ModalAddLanding({ handleClose, open, landingsList }: Props) {
   
   const [id, setId] = useState<string>("");
   const [name, setName] = useState<string>("");
@@ -51,6 +52,7 @@ export default function ModalAddLanding({ handleClose, open }: Props) {
           size="large"
           color={showLink ? "info" : "success"}
           onClick={() => setShowLink((state) => !state)}
+          disabled={landingsList.some(e => e.landingId.toString() === id)}
         >
           {!showLink ? "Згенерувати" : "Редагувати"}
         </Button>
