@@ -69,5 +69,5 @@ export const useAddLanding = () => {
       alert(e);
     }
   };
-  return { addLanding, isSuccess, isError, isLoading };
+  return { addLanding, isSuccess, isError, isLoading, setIsSuccess, setIsError };
 };
